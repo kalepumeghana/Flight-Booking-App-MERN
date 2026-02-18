@@ -1,0 +1,43 @@
+.allFlightsPage{
+    margin-top: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.allFlightsPage h1{
+    color: rgb(73, 111, 138);
+    margin-bottom: 20px;
+}
+
+.allFlights{
+    width: 80%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+}
+
+.allFlights-Flight{
+    background-color: #f5f7f9;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    width: 100%;
+}
+
+.allFlights-Flight:hover{
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.allFlights-Flight span{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.allFlights-Flight p{
+    margin: 0;
+    font-size: 14px;
+    color: #2e6887;
+}

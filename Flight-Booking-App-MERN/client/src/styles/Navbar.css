@@ -1,0 +1,36 @@
+.navbar {
+  height: 60px;
+  background: linear-gradient(to right, #1e40af, #2563eb);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Left title */
+.nav-left h3 {
+  margin: 0;
+  font-size: 20px;
+  white-space: nowrap;
+}
+
+/* Right menu */
+.nav-options {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  white-space: nowrap;   /* prevents wrapping */
+}
+
+.nav-options p {
+  margin: 0;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.nav-options p:hover {
+  text-decoration: underline;
+}

@@ -6,274 +6,302 @@ import bcrypt from 'bcrypt';
 import { User, Booking, Flight } from './schemas.js';
 
 const app = express();
-
-app.use(express.json());
-app.use(bodyParser.json({limit: "30mb", extended: true}))
-app.use(bodyParser.urlencoded({limit: "30mb", extended: true}));
-app.use(cors());
-
-// mongoose setup
-
 const PORT = 6001;
-mongoose.connect('mongodb://localhost:27017/FlightBookingMERN', { 
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-    }
-).then(()=>{
 
-    // All the client-server activites
+/* ======================
+      Middleware
+====================== */
+app.use(cors());
+app.use(express.json());
+app.use(bodyParser.json({ limit: "30mb", extended: true }));
+app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 
+/* ======================
+        USER ROUTES
+====================== */
 
-    app.post('/register', async (req, res) => {
-        const { username, email, usertype, password } = req.body;
-        let approval = 'approved';
-        try {
-          
-            const existingUser = await User.findOne({ email });
-            if (existingUser) {
-                return res.status(400).json({ message: 'User already exists' });
-            }
+/* ---------- Register ---------- */
+app.post('/register', async (req, res) => {
+    const { username, email, usertype, password } = req.body;
+    let approval = 'approved';
 
-            if(usertype === 'flight-operator'){
-                approval = 'not-approved'
-            }
-
-            const hashedPassword = await bcrypt.hash(password, 10);
-            const newUser = new User({
-                username, email, usertype, password: hashedPassword, approval
-            });
-            const userCreated = await newUser.save();
-            return res.status(201).json(userCreated);
-
-        } catch (error) {
-          console.log(error);
-          return res.status(500).json({ message: 'Server Error' });
+    try {
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: 'User already exists' });
         }
-    });
 
-    app.post('/login', async (req, res) => {
-        const { email, password } = req.body;
-        try {
-
-            const user = await User.findOne({ email });
-    
-            if (!user) {
-                return res.status(401).json({ message: 'Invalid email or password' });
-            }
-            const isMatch = await bcrypt.compare(password, user.password);
-            if (!isMatch) {
-                return res.status(401).json({ message: 'Invalid email or password' });
-            } else{
-                
-                return res.json(user);
-            }
-          
-        } catch (error) {
-          console.log(error);
-          return res.status(500).json({ message: 'Server Error' });
+        // Flight operator needs approval
+        if (usertype === 'flight-operator') {
+            approval = 'not-approved';
         }
-    });
-      
 
-    // Approve flight operator
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-    app.post('/approve-operator', async(req, res)=>{
-        const {id} = req.body;
-        try{
-            
-            const user = await User.findById(id);
-            user.approval = 'approved';
-            await user.save();
-            res.json({message: 'approved!'})
-        }catch(err){
-            res.status(500).json({ message: 'Server Error' });
-        }
-    })
-
-    // reject flight operator
-
-    app.post('/reject-operator', async(req, res)=>{
-        const {id} = req.body;
-        try{
-            
-            const user = await User.findById(id);
-            user.approval = 'rejected';
-            await user.save();
-            res.json({message: 'rejected!'})
-        }catch(err){
-            res.status(500).json({ message: 'Server Error' });
-        }
-    })
-
-
-    // fetch user
-
-    app.get('/fetch-user/:id', async (req, res)=>{
-        const id = await req.params.id;
-        console.log(req.params.id)
-        try{
-            const user = await User.findById(req.params.id);
-            console.log(user);
-            res.json(user);
-
-        }catch(err){
-            console.log(err);
-        }
-    })
-
-    // fetch all users
-
-    app.get('/fetch-users', async (req, res)=>{
-
-        try{
-            const users = await User.find();
-            res.json(users);
-
-        }catch(err){
-            res.status(500).json({message: 'error occured'});
-        }
-    })
-
-
-    // Add flight
-
-    app.post('/add-flight', async (req, res)=>{
-        const {flightName, flightId, origin, destination, departureTime, 
-                                arrivalTime, basePrice, totalSeats} = req.body;
-        try{
-
-            const flight = new Flight({flightName, flightId, origin, destination, 
-                                        departureTime, arrivalTime, basePrice, totalSeats});
-            const newFlight = flight.save();
-
-            res.json({message: 'flight added'});
-
-        }catch(err){
-            console.log(err);
-        }
-    })
-
-    // update flight
-    
-    app.put('/update-flight', async (req, res)=>{
-        const {_id, flightName, flightId, origin, destination, 
-                    departureTime, arrivalTime, basePrice, totalSeats} = req.body;
-        try{
-
-            const flight = await Flight.findById(_id)
-
-            flight.flightName = flightName;
-            flight.flightId = flightId;
-            flight.origin = origin;
-            flight.destination = destination;
-            flight.departureTime = departureTime;
-            flight.arrivalTime = arrivalTime;
-            flight.basePrice = basePrice;
-            flight.totalSeats = totalSeats;
-
-            const newFlight = flight.save();
-
-            res.json({message: 'flight updated'});
-
-        }catch(err){
-            console.log(err);
-        }
-    })
-
-    // fetch flights
-
-    app.get('/fetch-flights', async (req, res)=>{
-        
-        try{
-            const flights = await Flight.find();
-            res.json(flights);
-
-        }catch(err){
-            console.log(err);
-        }
-    })
-
-
-    // fetch flight
-
-    app.get('/fetch-flight/:id', async (req, res)=>{
-        const id = await req.params.id;
-        console.log(req.params.id)
-        try{
-            const flight = await Flight.findById(req.params.id);
-            console.log(flight);
-            res.json(flight);
-
-        }catch(err){
-            console.log(err);
-        }
-    })
-
-    // fetch all bookings
-
-    app.get('/fetch-bookings', async (req, res)=>{
-        
-        try{
-            const bookings = await Booking.find();
-            res.json(bookings);
-
-        }catch(err){
-            console.log(err);
-        }
-    })
-
-    // Book ticket
-
-    app.post('/book-ticket', async (req, res)=>{
-        const {user, flight, flightName, flightId,  departure, destination, 
-                    email, mobile, passengers, totalPrice, journeyDate, journeyTime, seatClass} = req.body;
-        try{
-            const bookings = await Booking.find({flight: flight, journeyDate: journeyDate, seatClass: seatClass});
-            const numBookedSeats = bookings.reduce((acc, booking) => acc + booking.passengers.length, 0);
-            
-            let seats = "";
-            const seatCode = {'economy': 'E', 'premium-economy': 'P', 'business': 'B', 'first-class': 'A'};
-            let coach = seatCode[seatClass];
-            for(let i = numBookedSeats + 1; i< numBookedSeats + passengers.length+1; i++){
-                if(seats === ""){
-                    seats = seats.concat(coach, '-', i);
-                }else{
-                    seats = seats.concat(", ", coach, '-', i);
-                }
-            }
-            const booking = new Booking({user, flight, flightName, flightId, departure, destination, 
-                                            email, mobile, passengers, totalPrice, journeyDate, journeyTime, seatClass, seats});
-            await booking.save();
-
-            res.json({message: 'Booking successful!!'});
-        }catch(err){
-            console.log(err);
-        }
-    })
-
-
-    // cancel ticket
-
-    app.put('/cancel-ticket/:id', async (req, res)=>{
-        const id = await req.params.id;
-        try{
-            const booking = await Booking.findById(req.params.id);
-            booking.bookingStatus = 'cancelled';
-            await booking.save();
-            res.json({message: "booking cancelled"});
-
-        }catch(err){
-            console.log(err);
-        }
-    })
-
-
-
-
-
-
-        app.listen(PORT, ()=>{
-            console.log(`Running @ ${PORT}`);
+        const newUser = new User({
+            username,
+            email,
+            usertype,
+            password: hashedPassword,
+            approval
         });
+
+        const savedUser = await newUser.save();
+
+        // IMPORTANT: Send data needed by frontend
+        res.status(201).json({
+            userId: savedUser._id,
+            username: savedUser.username,
+            userType: savedUser.usertype,
+            email: savedUser.email
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'Server Error' });
     }
-).catch((e)=> console.log(`Error in db connection ${e}`));
+});
+
+
+/* ---------- Login ---------- */
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    console.log("Login attempt:", email);
+
+    try {
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(401).json({ message: 'User not found' });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        console.log("Password match:", isMatch);
+
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Wrong password' });
+        }
+
+        // Operator approval check
+        if (user.usertype === 'flight-operator' && user.approval !== 'approved') {
+            return res.status(403).json({ message: 'Operator not approved yet' });
+        }
+
+        res.json({
+            message: "Login successful",
+            userId: user._id,
+            username: user.username,
+            userType: user.usertype,
+            email: user.email
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
+
+/* ---------- Reset Password ---------- */
+app.post('/reset-password', async (req, res) => {
+    const { email, newPassword } = req.body;
+
+    try {
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        user.password = hashedPassword;
+        await user.save();
+
+        res.json({ message: "Password reset successful" });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
+
+/* ---------- Fetch user by ID ---------- */
+app.get('/fetch-user/:id', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.json(user);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Error fetching user" });
+    }
+});
+
+
+/* ---------- Fetch all users ---------- */
+app.get('/fetch-users', async (req, res) => {
+    try {
+        const users = await User.find();
+        res.json(users);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Error fetching users" });
+    }
+});
+
+
+/* ---------- Approve operator ---------- */
+app.post('/approve-operator', async (req, res) => {
+    const { id } = req.body;
+
+    try {
+        const user = await User.findById(id);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        user.approval = 'approved';
+        await user.save();
+
+        res.json({ message: 'Operator approved' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error approving operator' });
+    }
+});
+
+
+/* ---------- Reject operator ---------- */
+app.post('/reject-operator', async (req, res) => {
+    const { id } = req.body;
+
+    try {
+        const user = await User.findById(id);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        user.approval = 'rejected';
+        await user.save();
+
+        res.json({ message: 'Operator rejected' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error rejecting operator' });
+    }
+});
+
+
+/* ======================
+        FLIGHTS
+====================== */
+
+// Add flight
+app.post('/add-flight', async (req, res) => {
+    try {
+        const flight = new Flight(req.body);
+        await flight.save();
+        res.json({ message: 'Flight added successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error adding flight' });
+    }
+});
+
+// Fetch flights
+app.get('/fetch-flights', async (req, res) => {
+    try {
+        const flights = await Flight.find();
+        res.json(flights);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching flights' });
+    }
+});
+
+// Delete flight
+app.delete('/delete-flight/:id', async (req, res) => {
+    try {
+        await Flight.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Flight deleted' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error deleting flight' });
+    }
+});
+
+
+/* ======================
+        BOOKINGS
+====================== */
+
+// Fetch all bookings (Admin)
+app.get('/fetch-bookings', async (req, res) => {
+    try {
+        const bookings = await Booking.find();
+        res.json(bookings);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching bookings' });
+    }
+});
+
+// Fetch bookings by user
+app.get('/fetch-bookings/:userId', async (req, res) => {
+    try {
+        const bookings = await Booking.find({ user: req.params.userId });
+        res.json(bookings);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching user bookings' });
+    }
+});
+
+// Book ticket
+app.post('/book-ticket', async (req, res) => {
+    try {
+        const booking = new Booking({
+            ...req.body,
+            status: 'confirmed'
+        });
+
+        await booking.save();
+        res.json({ message: 'Booking successful' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error booking ticket' });
+    }
+});
+
+// Cancel ticket
+app.put('/cancel-ticket/:id', async (req, res) => {
+    try {
+        const booking = await Booking.findById(req.params.id);
+
+        if (!booking) {
+            return res.status(404).json({ message: 'Booking not found' });
+        }
+
+        booking.status = 'cancelled';
+        await booking.save();
+
+        res.json({ message: 'Booking cancelled' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error cancelling ticket' });
+    }
+});
+
+
+/* ======================
+      DATABASE
+====================== */
+
+mongoose.connect("mongodb://127.0.0.1:27017/FlightBookingMERN")
+.then(() => {
+    console.log("MongoDB Connected");
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+})
+.catch(err => console.log(err));

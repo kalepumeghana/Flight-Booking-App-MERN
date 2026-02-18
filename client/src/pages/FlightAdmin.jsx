@@ -1,106 +1,146 @@
-import React, { useEffect, useState } from 'react'
-import axios from 'axios'
-import '../styles/FlightAdmin.css'
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import '../styles/FlightAdmin.css';
 import { useNavigate } from 'react-router-dom';
 
 const FlightAdmin = () => {
-
   const navigate = useNavigate();
 
-  const [userDetails, setUserDetails] = useState();
-  const [bookingCount, setbookingCount] = useState(0);
+  const [userDetails, setUserDetails] = useState(null);
+  const [bookingCount, setBookingCount] = useState(0);
   const [flightsCount, setFlightsCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(()=>{
-    fetchUserData();
-  }, [])
+  /* ==============================
+        Fetch Dashboard Counts
+  ============================== */
+  const fetchDashboardData = async () => {
+    try {
+      const bookingRes = await axios.get(
+        'http://localhost:6001/fetch-bookings'
+      );
+      setBookingCount(bookingRes.data.length);
 
-  const fetchUserData = async () =>{
-    try{
-      const id = localStorage.getItem('userId');
-      await axios.get(`http://localhost:6001/fetch-user/${id}`).then(
-        (response)=>{
-          setUserDetails(response.data);
-          console.log(response.data);
-        }
-      )
-
-    }catch(err){
-
+      const flightRes = await axios.get(
+        'http://localhost:6001/fetch-flights'
+      );
+      setFlightsCount(flightRes.data.length);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
     }
-  } 
+  };
 
+  /* ==============================
+        Fetch Logged-in User
+  ============================== */
+  const fetchUserData = async (id) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:6001/fetch-user/${id}`
+      );
 
-  useEffect(()=>{
+      setUserDetails(response.data);
 
-    fetchData();
-  }, [])
+      // Load dashboard after user loads
+      fetchDashboardData();
+    } catch (err) {
+      console.log(err);
+      navigate('/auth');
+    }
+  };
 
-  const fetchData = async () =>{
-    await axios.get('http://localhost:6001/fetch-bookings').then(
-      (response)=>{
-        setbookingCount(response.data.filter(booking => booking.flightName === localStorage.getItem('username')).length);
-      }
-    );
-    await axios.get('http://localhost:6001/fetch-flights').then(
-      (response)=>{
-        setFlightsCount(response.data.filter(booking => booking.flightName === localStorage.getItem('username')).length);
-      }
-    );
+  /* ==============================
+        Check Login
+  ============================== */
+  useEffect(() => {
+    const id = localStorage.getItem('userId');
+
+    if (!id) {
+      navigate('/auth');
+      return;
+    }
+
+    fetchUserData(id);
+  }, [navigate]);
+
+  /* ==============================
+            UI
+  ============================== */
+
+  if (loading) {
+    return <p style={{ textAlign: 'center' }}>Loading...</p>;
   }
 
   return (
     <div className="flightAdmin-page">
 
-      {userDetails ?
+      {userDetails && (
         <>
-          {userDetails.approval === 'not-approved' ?
+          {/* Not Approved */}
+          {userDetails.approval === 'not-approved' && (
             <div className="notApproved-box">
               <h3>Approval Required!!</h3>
-              <p>Your application is under processing. It needs an approval from the administrator. Kindly please be patience!!</p>
+              <p>Your application is under processing. Please wait for admin approval.</p>
             </div>
+          )}
 
-
-          : userDetails.approval === 'rejected' ?
+          {/* Rejected */}
+          {userDetails.approval === 'rejected' && (
             <div className="notApproved-box">
               <h3>Application Rejected!!</h3>
-              <p>We are sorry to inform you that your application has been rejected!!</p>
-          </div>
-          : userDetails.approval === 'approved' ?
-            
+              <p>Your operator request has been rejected.</p>
+            </div>
+          )}
 
-          <div className="admin-page-cards">
+          {/* Approved Dashboard */}
+          {userDetails.approval === 'approved' && (
+            <div className="admin-page-cards">
 
-          <div className="card admin-card transactions-card">
-              <h4>Bookings</h4>
-              <p> {bookingCount} </p>
-              <button className="btn btn-primary" onClick={()=>navigate('/flight-bookings')}>View all</button>
-          </div>
+              {/* Bookings */}
+              <div className="card admin-card">
+                <h4>Bookings</h4>
+                <p>{bookingCount}</p>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => navigate('/flight-bookings')}
+                >
+                  View all
+                </button>
+              </div>
 
-          <div className="card admin-card deposits-card">
-              <h4>Flights</h4>
-              <p> {flightsCount} </p>
-              <button className="btn btn-primary" onClick={()=>navigate('/flights')}>View all</button>
-          </div>
+              {/* Flights */}
+              <div className="card admin-card">
+                <h4>Flights</h4>
+                <p>{flightsCount}</p>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => navigate('/flights')}
+                >
+                  View all
+                </button>
+              </div>
 
-          <div className="card admin-card loans-card">
-              <h4>New Flight</h4>
-              <p> (new route) </p>
-              <button className="btn btn-primary" onClick={()=>navigate('/new-flight')}>Add now</button>
-          </div>
+              {/* Add Flight */}
+              <div className="card admin-card">
+                <h4>New Flight</h4>
+                <p>(Add new route)</p>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => navigate('/new-flight')}
+                >
+                  Add now
+                </button>
+              </div>
 
-      </div>
-
-          :
-            ""
-          }
+            </div>
+          )}
         </>
-      :
-       ""
-      }
+      )}
 
     </div>
-  )
-}
+  );
+};
 
-export default FlightAdmin
+export default FlightAdmin;

@@ -1,5 +1,8 @@
-.App{
- 
-  overflow-x: hidden;
-  height: fit-content;
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+.App {
+  min-height: 100vh;   /* full screen height */
 }

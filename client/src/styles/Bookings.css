@@ -1,62 +1,81 @@
-.user-bookingsPage{
-    margin: 13vh 0 0 0;
-    height: fit-content;
+/* Page Container */
+.user-bookingsPage {
     width: 100%;
+    min-height: 100%;
+    padding: 20px;
+    margin: 0;                 /* remove top gap */
 }
 
-.user-bookingsPage h1{
+/* Page Title */
+.user-bookingsPage h1 {
     color: rgb(73, 111, 138);
-    margin-left: 3vw;
+    margin-bottom: 20px;
 }
 
-.user-bookings{
+/* Grid Container */
+.user-bookings {
+    width: 100%;
+    padding-bottom: 40px;
 
-    margin-top: 5vh;
-    width: 90%;
-    margin-left: 5%;
-    height: fit-content;
-    padding-bottom: 5vh;
     display: grid;
-    grid-template-columns: 50% 50%;
-    row-gap: 30px;
-}
-
-.user-bookings .user-booking{
-
-    background-color: rgba(237, 239, 241, 0.212);
-    width: 90%;
-    margin-left: 5%;
-    padding: 3vh 2vw;
-    border-radius: 0.7rem;
-    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
-
-}
-.user-bookings .user-booking:hover{
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px;
-}
-.user-bookings .user-booking span{
-    display: flex;
+    grid-template-columns: 1fr 1fr;   /* ALWAYS 2 columns */
     gap: 25px;
-    
 }
 
-.user-bookings .user-booking p{
-    margin: 0;
-    margin-bottom: 3px;
+/* Booking Card */
+.user-bookings .user-booking {
+    background-color: rgba(237, 239, 241, 0.7);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+    transition: 0.3s;
+}
+
+/* Hover Effect */
+.user-bookings .user-booking:hover {
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 10px 40px;
+    transform: translateY(-3px);
+}
+
+/* Two-column text inside card */
+.user-bookings .user-booking span {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+/* Text */
+.user-bookings .user-booking p {
+    margin-bottom: 6px;
     color: rgb(46, 104, 135);
+    font-size: 14px;
 }
-.user-bookings .user-booking p b{
 
+.user-bookings .user-booking p b {
     font-weight: 600;
 }
-.user-bookings .user-booking ol{
-    margin: 0;   
-    font-size: 0.85rem;     
-}
-.user-bookings .user-booking ol b{
-   font-weight: 500;      
-}
-.user-bookings .user-booking button{
 
+/* Cancel Button */
+.user-bookings .user-booking button {
     margin-top: 15px;
+    padding: 8px 16px;
+    border: none;
+    background-color: #d9534f;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.user-bookings .user-booking button:hover {
+    background-color: #c9302c;
+}
+
+/* No bookings text */
+.user-bookings h3 {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: #666;
 }

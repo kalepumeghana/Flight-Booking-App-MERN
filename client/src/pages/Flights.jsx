@@ -1,103 +1,95 @@
 import axios from 'axios';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const Flights = () => {
-  const [userDetails, setUserDetails] = useState();
 
-  useEffect(()=>{
-    fetchUserData();
-  }, [])
-
-  const fetchUserData = async () =>{
-    try{
-      const id = localStorage.getItem('userId');
-      await axios.get(`http://localhost:6001/fetch-user/${id}`).then(
-        (response)=>{
-          setUserDetails(response.data);
-          console.log(response.data);
-        }
-      )
-
-    }catch(err){
-
-    }
-  } 
-
+  const [userDetails, setUserDetails] = useState(null);
   const [flights, setFlights] = useState([]);
   const navigate = useNavigate();
 
-  
-  const fetchFlights = async () =>{
-    await axios.get('http://localhost:6001/fetch-flights').then(
-      (response)=>{
-        setFlights(response.data);
-        console.log(response.data)
-      }
-      )
+  useEffect(() => {
+    const id = localStorage.getItem('userId');
+
+    if (!id) {
+      navigate('/auth');
+      return;
     }
-    
-    useEffect(()=>{
-      fetchFlights();
-    }, [])
+
+    fetchUserData(id);
+    fetchFlights();
+  }, [navigate]);
+
+  // Fetch user
+  const fetchUserData = async (id) => {
+    try {
+      const res = await axios.get(`http://localhost:6001/fetch-user/${id}`);
+      setUserDetails(res.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // Fetch flights
+  const fetchFlights = async () => {
+    try {
+      const res = await axios.get('http://localhost:6001/fetch-flights');
+      setFlights(res.data);
+      console.log("Flights:", res.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   return (
     <div className="allFlightsPage">
 
-      {userDetails ?
+      {!userDetails ? (
+        <p style={{ textAlign: "center" }}>Loading...</p>
+      ) : (
         <>
-          {userDetails.approval === 'not-approved' ?
+          {userDetails.approval === 'not-approved' ? (
             <div className="notApproved-box">
               <h3>Approval Required!!</h3>
-              <p>Your application is under processing. It needs an approval from the administrator. Kindly please be patience!!</p>
+              <p>Your application is under processing.</p>
             </div>
-
-
-          : userDetails.approval === 'approved' ?
+          ) : (
             <>
-              <h1>All Flights</h1>
-  
+              <h1 style={{ textAlign: "center" }}>All Flights</h1>
+
               <div className="allFlights">
 
-                {flights.filter(flight=> flight.flightName === localStorage.getItem('username')).map((Flight)=>{
-                  return(
+                {flights.length === 0 ? (
+                  <p>No flights available</p>
+                ) : (
+                  flights.map((flight) => (
+                    <div className="allFlights-Flight" key={flight._id}>
+                      <p><b>Flight Id:</b> {flight.flightId}</p>
+                      <p><b>Name:</b> {flight.flightName}</p>
+                      <p><b>From:</b> {flight.origin}</p>
+                      <p><b>To:</b> {flight.destination}</p>
+                      <p><b>Departure:</b> {flight.departureTime}</p>
+                      <p><b>Arrival:</b> {flight.arrivalTime}</p>
+                      <p><b>Price:</b> {flight.basePrice}</p>
+                      <p><b>Seats:</b> {flight.totalSeats}</p>
 
-                      <div className="allFlights-Flight" key={Flight._id}>
-                        <p><b>_id:</b> {Flight._id}</p>
-                        <span>
-                          <p><b>Flight Id:</b> {Flight.flightId}</p>
-                          <p><b>Flight name:</b> {Flight.flightName}</p>
-                        </span>
-                        <span>
-                          <p><b>Starting station:</b> {Flight.origin}</p>
-                          <p><b>Departure time:</b> {Flight.departureTime}</p>
-                        </span>
-                        <span>
-                          <p><b>Destination:</b> {Flight.destination}</p>
-                          <p><b>Arrival time:</b> {Flight.arrivalTime}</p>
-                        </span>
-                        <span>
-                          <p><b>Base price:</b> {Flight.basePrice}</p>
-                          <p><b>Total seats:</b> {Flight.totalSeats}</p>
-                        </span>
-                        <div>
-                          <button className="btn btn-primary" onClick={()=> navigate(`/edit-flight/${Flight._id}`)}>Edit details</button>
-                        </div>
-                      </div>
-                  )
-                })}
+                      <button
+                        className="btn btn-primary"
+                        onClick={() => navigate(`/edit-flight/${flight._id}`)}
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  ))
+                )}
+
               </div>
             </>
-          :
-            ""
-          }
+          )}
         </>
-      :
-       ""
-      }
-
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default Flights
+export default Flights;

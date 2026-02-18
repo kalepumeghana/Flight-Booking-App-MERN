@@ -1,14 +1,26 @@
-import { useEffect } from 'react';
+import React from 'react';
+import { Navigate } from 'react-router-dom';
 
-const AuthProtector =  ({ children }) => {
+const AuthProtector = ({ children, role }) => {
+  const userType = localStorage.getItem("userType");
 
-  useEffect(() => {
+  // Not logged in
+  if (!userType) {
+    return <Navigate to="/auth" />;
+  }
 
-    if (!localStorage.getItem('userType')) {
-      window.location.href = '/';
+  // If role is array
+  if (Array.isArray(role)) {
+    if (!role.includes(userType)) {
+      return <Navigate to="/" />;
     }
-  }, [localStorage]);
-
+  }
+  // If single role
+  else {
+    if (role !== userType) {
+      return <Navigate to="/" />;
+    }
+  }
 
   return children;
 };

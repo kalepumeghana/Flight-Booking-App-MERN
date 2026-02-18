@@ -1,22 +1,19 @@
-import logo from './logo.svg';
 import './App.css';
 import Navbar from './components/Navbar';
 import LandingPage from './pages/LandingPage';
 import Authenticate from './pages/Authenticate';
 import Bookings from './pages/Bookings';
 import Admin from './pages/Admin';
-import AllUsers from './pages/AllUsers';
-import AllBookings from './pages/AllBookings';
-import AllFlights from './pages/AllFlights';
 import NewFlight from './pages/NewFlight';
-import {Routes, Route} from 'react-router-dom'
-import LoginProtector from './RouteProtectors/LoginProtector';
-import AuthProtector from './RouteProtectors/AuthProtector';
 import BookFlight from './pages/BookFlight';
 import EditFlight from './pages/EditFlight';
 import FlightAdmin from './pages/FlightAdmin';
-import FlightBookings from './pages/FlightBookings.jsx';
-import Flights from './pages/Flights.jsx';
+import FlightBookings from './pages/FlightBookings';
+import Flights from './pages/Flights';
+
+import { Routes, Route, Navigate } from 'react-router-dom';
+import LoginProtector from './RouteProtectors/LoginProtector';
+import AuthProtector from './RouteProtectors/AuthProtector';
 
 function App() {
   return (
@@ -24,23 +21,100 @@ function App() {
       <Navbar />
 
       <Routes>
-        <Route exact path = '' element={<LandingPage />} />
-        <Route path='/auth' element={<LoginProtector> <Authenticate /> </LoginProtector>} />
-        <Route path='/book-Flight/:id' element={<AuthProtector> <BookFlight /> </AuthProtector>} />
-        <Route path='/bookings' element={<AuthProtector> <Bookings /> </AuthProtector>} />
+        {/* PUBLIC */}
+        <Route path="/" element={<LandingPage />} />
 
-        <Route path='/admin' element={<AuthProtector><Admin /> </AuthProtector>} />
-        <Route path='/all-users' element={<AuthProtector><AllUsers /> </AuthProtector>} />
-        <Route path='/all-bookings' element={<AuthProtector><AllBookings /> </AuthProtector>} />
-        <Route path='/all-flights' element={<AuthProtector><AllFlights /> </AuthProtector>} />
+        {/* LOGIN PAGE */}
+        <Route
+          path="/auth"
+          element={
+            <LoginProtector>
+              <Authenticate />
+            </LoginProtector>
+          }
+        />
 
-        <Route path='/flight-admin' element={<AuthProtector><FlightAdmin /> </AuthProtector>} />
-        <Route path='/flight-bookings' element={<AuthProtector><FlightBookings /> </AuthProtector>} />
-        <Route path='/flights' element={<AuthProtector><Flights /> </AuthProtector>} />
-        <Route path='/new-flight' element={<AuthProtector><NewFlight /> </AuthProtector>} />
-        <Route path='/edit-flight/:id' element={<AuthProtector><EditFlight /> </AuthProtector>} />
+        {/* ================= CUSTOMER ================= */}
+
+        <Route
+          path="/flights"
+          element={
+            <AuthProtector role={["customer", "admin", "flight-operator"]}>
+              <Flights />
+            </AuthProtector>
+          }
+        />
+
+        <Route
+          path="/book-flight/:id"
+          element={
+            <AuthProtector role="customer">
+              <BookFlight />
+            </AuthProtector>
+          }
+        />
+
+        <Route
+          path="/bookings"
+          element={
+            <AuthProtector role="customer">
+              <Bookings />
+            </AuthProtector>
+          }
+        />
+
+        {/* ================= ADMIN ================= */}
+
+        <Route
+          path="/admin/*"
+          element={
+            <AuthProtector role="admin">
+              <Admin />
+            </AuthProtector>
+          }
+        />
+
+        {/* ================= OPERATOR + ADMIN ================= */}
+
+        <Route
+          path="/flight-admin"
+          element={
+            <AuthProtector role={["admin", "flight-operator"]}>
+              <FlightAdmin />
+            </AuthProtector>
+          }
+        />
+
+        <Route
+          path="/flight-bookings"
+          element={
+            <AuthProtector role={["admin", "flight-operator"]}>
+              <FlightBookings />
+            </AuthProtector>
+          }
+        />
+
+        <Route
+          path="/new-flight"
+          element={
+            <AuthProtector role={["admin", "flight-operator"]}>
+              <NewFlight />
+            </AuthProtector>
+          }
+        />
+
+        <Route
+          path="/edit-flight/:id"
+          element={
+            <AuthProtector role={["admin", "flight-operator"]}>
+              <EditFlight />
+            </AuthProtector>
+          }
+        />
+
+        {/* DEFAULT */}
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
-
     </div>
   );
 }

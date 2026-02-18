@@ -1,0 +1,66 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* IMPORTANT: Allow page scroll */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow-y: auto;     /* allow vertical scroll */
+  overflow-x: hidden;
+}
+
+/* Main Layout */
+.layout {
+  display: flex;
+  min-height: 100vh;    /* NOT height */
+  width: 100%;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  min-width: 220px;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  background: linear-gradient(to bottom, #1e40af, #2563eb);
+  color: white;
+}
+
+/* Right Section */
+.main-content {
+  margin-left: 220px;
+  width: calc(100% - 220px);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f5f7fb;
+}
+
+/* Navbar */
+.navbar {
+  height: 60px;
+  min-height: 60px;
+  flex-shrink: 0;
+}
+
+/* Page Content */
+.page-content {
+  flex: 1;
+  padding: 20px;
+  margin-top: 0;
+  padding-top: 0;
+  /* IMPORTANT: remove overflow here */
+}
+
+/* Remove default heading gap inside pages */
+.page-content h1,
+.page-content h2,
+.page-content h3 {
+    margin-top: 0;
+}

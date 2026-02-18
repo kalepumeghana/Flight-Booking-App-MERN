@@ -1,84 +1,75 @@
-import React, { useContext } from 'react'
+import React, { useContext } from 'react';
 import '../styles/Navbar.css';
 import { useNavigate } from 'react-router-dom';
 import { GeneralContext } from '../context/GeneralContext';
 
 const Navbar = () => {
+  const navigate = useNavigate();
+  const { logout } = useContext(GeneralContext);
 
-    const navigate = useNavigate();
-    const usertype = localStorage.getItem('userType');
-
-    const {logout} = useContext(GeneralContext);
+  // Get role from localStorage
+  const usertype = localStorage.getItem("userType");
+  const username = localStorage.getItem("username");
 
   return (
-    <>
-        <div className="navbar">
+    <div className="navbar">
 
-        {!usertype ? 
-        
-            <>
-                <h3 >SB Flights</h3>
+      {/* ================= LEFT TITLE ================= */}
+      <div className="nav-left">
+        {!usertype && <h3>SB Flights</h3>}
+        {usertype === 'customer' && <h3>SB Flights</h3>}
+        {usertype === 'admin' && <h3>SB Flights (Admin)</h3>}
+        {usertype === 'flight-operator' && <h3>SB Flights (Operator)</h3>}
+      </div>
 
-                <div className="nav-options" >
-                    <p onClick={()=>navigate('/')}>Home</p>
-                    <p onClick={()=>navigate('/auth')}>Login</p>
-                </div>
-            
-            </>
-        :
-        
-        <>
-        {usertype === 'customer' ? 
-        
-        <>
-            <h3 >SB Flights</h3>
+      {/* ================= RIGHT OPTIONS ================= */}
+      <div className="nav-options">
 
-            <div className="nav-options" >
+        {/* Not Logged In */}
+        {!usertype && (
+          <>
+            <p onClick={() => navigate('/')}>Home</p>
+            <p onClick={() => navigate('/auth')}>Login</p>
+          </>
+        )}
 
-                <p onClick={()=>navigate('/')}>Home</p>
-                <p onClick={()=>navigate('/bookings')}>Bookings</p>
-                <p onClick={logout}>Logout</p>
+        {/* ================= CUSTOMER ================= */}
+        {usertype === 'customer' && (
+          <>
+            <p onClick={() => navigate('/')}>Home</p>
+            <p onClick={() => navigate('/flights')}>Flights</p>
+            <p onClick={() => navigate('/bookings')}>My Bookings</p>
+            <p className="username">Hi, {username}</p>
+            <p onClick={logout}>Logout</p>
+          </>
+        )}
 
-            </div>
-        </>
-            :  usertype === 'admin' ?
+        {/* ================= ADMIN ================= */}
+        {usertype === 'admin' && (
+          <>
+            <p onClick={() => navigate('/admin')}>Dashboard</p>
+            <p onClick={() => navigate('/flight-admin')}>Manage Flights</p>
+            <p onClick={() => navigate('/flight-bookings')}>All Bookings</p>
+            <p className="username">Admin: {username}</p>
+            <p onClick={logout}>Logout</p>
+          </>
+        )}
 
-                    <>
-                        <h3 >SB Flights (Admin)</h3>
-                        <div className="nav-options" >
+        {/* ================= OPERATOR ================= */}
+        {usertype === 'flight-operator' && (
+          <>
+            <p onClick={() => navigate('/flight-admin')}>Dashboard</p>
+            <p onClick={() => navigate('/new-flight')}>Add Flight</p>
+            <p onClick={() => navigate('/flights')}>View Flights</p>
+            <p onClick={() => navigate('/flight-bookings')}>Bookings</p>
+            <p className="username">Operator: {username}</p>
+            <p onClick={logout}>Logout</p>
+          </>
+        )}
 
-                            <p onClick={()=>navigate('/admin')}>Home</p>
-                            <p onClick={()=>navigate('/all-users')}>Users</p>
-                            <p onClick={()=>navigate('/all-bookings')}>Bookings</p>
-                            <p onClick={()=>navigate('/all-flights')}>Flights</p>
-                            <p onClick={logout}>Logout</p>
-                        </div> 
-                    </>
-            
-                : usertype === 'flight-operator' ?
-                    <>
-                        <h3 >SB Flights (Operator)</h3>
-                        <div className="nav-options" >
+      </div>
+    </div>
+  );
+};
 
-                            <p onClick={()=>navigate('/flight-admin')}>Home</p>
-                            <p onClick={()=>navigate('/flight-bookings')}>Bookings</p>
-                            <p onClick={()=>navigate('/flights')}>Flights</p>
-                            <p onClick={()=>navigate('/new-flight')}>Add Flight</p>
-                            <p onClick={logout}>Logout</p>
-                        </div> 
-                    </>
-            
-                :
-
-                    ""
-
-        }
-        </>
-        }
-        </div>
-    
-    </>
-  )
-}
-
-export default Navbar
+export default Navbar;

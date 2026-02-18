@@ -1,34 +1,36 @@
-.navbar{
-
-    height: 10vh;
-    width: 100%;
-    position: fixed;
-    top: 0vh;
-    z-index: 10;
-    background-color: rgb(28, 82, 126) !important;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 3%;
-    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+.navbar {
+  height: 60px;
+  background: linear-gradient(to right, #1e40af, #2563eb);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.navbar h3{
-    color: aliceblue;
+/* Left title */
+.nav-left h3 {
+  margin: 0;
+  font-size: 20px;
+  white-space: nowrap;
 }
 
-.nav-options{
-    display: flex;
-    gap: 20px;
+/* Right menu */
+.nav-options {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  white-space: nowrap;   /* prevents wrapping */
 }
 
-.nav-options p{
-    margin: 0;
-    color: rgb(209, 210, 211);
-    text-decoration: none;
-    cursor: pointer;
+.nav-options p {
+  margin: 0;
+  cursor: pointer;
+  font-size: 14px;
 }
 
-.nav-options p:hover{
-    color: aliceblue;
+.nav-options p:hover {
+  text-decoration: underline;
 }

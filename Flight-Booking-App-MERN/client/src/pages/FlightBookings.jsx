@@ -15,7 +15,7 @@ const FlightBookings = () => {
       const response = await axios.get(
         "http://localhost:6001/fetch-bookings"
       );
-      setBookings(response.data);
+      setBookings(response.data.filter((booking) => booking.bookingStatus !== "cancelled"));
     } catch (error) {
       console.log("Error fetching bookings:", error);
     }
@@ -24,7 +24,7 @@ const FlightBookings = () => {
   // Cancel booking
   const cancelTicket = async (id) => {
     try {
-      await axios.delete(`http://localhost:6001/cancel-booking/${id}`);
+      await axios.put(`http://localhost:6001/cancel-ticket/${id}`);
       alert("Booking cancelled");
       fetchBookings();
     } catch (error) {
@@ -63,7 +63,7 @@ const FlightBookings = () => {
                 </p>
               )}
 
-              {booking.status !== "cancelled" && (
+              {booking.bookingStatus !== "cancelled" && (
                 <button onClick={() => cancelTicket(booking._id)}>
                   Cancel Ticket
                 </button>

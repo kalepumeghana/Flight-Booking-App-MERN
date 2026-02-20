@@ -220,7 +220,46 @@ app.get('/fetch-flights', async (req, res) => {
         const flights = await Flight.find();
         res.json(flights);
     } catch (error) {
+        console.log(error);
         res.status(500).json({ message: 'Error fetching flights' });
+    }
+});
+// Fetch single flight
+app.get('/fetch-flight/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const flight = await Flight.findById(id);
+
+    if (!flight) {
+      return res.status(404).json({ message: "Flight not found" });
+    }
+
+    res.json(flight);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error fetching flight" });
+  }
+});
+// Update flight
+app.put('/update-flight/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const updatedFlight = await Flight.findByIdAndUpdate(
+            id,
+            req.body,
+            { new: true }
+        );
+
+        if (!updatedFlight) {
+            return res.status(404).json({ message: 'Flight not found' });
+        }
+
+        res.json({ message: 'Flight updated successfully', updatedFlight });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'Error updating flight' });
     }
 });
 
@@ -283,7 +322,7 @@ app.put('/cancel-ticket/:id', async (req, res) => {
             return res.status(404).json({ message: 'Booking not found' });
         }
 
-        booking.status = 'cancelled';
+        booking.bookingStatus = 'cancelled';
         await booking.save();
 
         res.json({ message: 'Booking cancelled' });
